@@ -1,0 +1,37 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\juane\OneDrive\Escritorio\ARQUITECTURA - ENTREGAS 3ER CORTE\hotel-corte-vertical\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\juane\OneDrive\Escritorio\ARQUITECTURA - ENTREGAS 3ER CORTE\hotel-corte-vertical\hotel-corte-vertical
+collecting ... collected 26 items
+
+tests/test_dominio.py::test_rango_valido_no_lanza PASSED
+tests/test_dominio.py::test_rangos_invalidos[inicio0-fin0-FECHA_PASADA] PASSED
+tests/test_dominio.py::test_rangos_invalidos[inicio1-fin1-RANGO_INVALIDO] PASSED
+tests/test_dominio.py::test_rangos_invalidos[inicio2-fin2-RANGO_INVALIDO] PASSED
+tests/test_dominio.py::test_fecha_con_formato_incorrecto PASSED
+tests/test_dominio.py::test_noches_y_total PASSED
+tests/test_dominio.py::test_habitacion_en_mantenimiento PASSED
+tests/test_dominio.py::test_registro_invalido[datos0-DATOS_FALTANTES] PASSED
+tests/test_dominio.py::test_registro_invalido[datos1-CORREO_INVALIDO] PASSED
+tests/test_dominio.py::test_registro_invalido[datos2-PASSWORD_DEBIL] PASSED
+tests/test_dominio.py::test_registro_invalido[datos3-FECHA_INVALIDA] PASSED
+tests/test_persistencia.py::test_guardar_reserva_y_recuperarla_desde_conexion_nueva PASSED
+tests/test_persistencia.py::test_guardar_usuario_y_recuperarlo PASSED
+tests/test_persistencia.py::test_id_inexistente_retorna_none PASSED
+tests/test_persistencia.py::test_restriccion_correo_unico PASSED
+tests/test_persistencia.py::test_listar_disponibles_excluye_ocupadas_y_mantenimiento PASSED
+tests/test_persistencia.py::test_listar_disponibles_filtra_por_tipo PASSED
+tests/test_persistencia.py::test_esta_ocupada_usa_rango_semiabierto PASSED
+tests/test_persistencia.py::test_rnf02_doble_reserva_se_revierte_sin_registros_parciales PASSED
+tests/test_persistencia.py::test_rnf01_linea_base_busqueda_20_consultas 
+RNF-01 tiempos (ms): [125.1, 92.8, 70.7, 69.6, 112.9, 127.0, 68.6, 70.9, 75.6, 82.1, 113.2, 109.4, 95.5, 72.4, 80.7, 75.4, 79.8, 74.0, 82.0, 84.4]
+RNF-01 m├íximo: 127.0 ms | promedio: 88.1 ms
+PASSED
+tests/test_servicios.py::test_registrar_usuario_valido_no_expone_password PASSED
+tests/test_servicios.py::test_registrar_correo_repetido_se_rechaza PASSED
+tests/test_servicios.py::test_crear_reserva_valida_calcula_total PASSED
+tests/test_servicios.py::test_crear_reserva_habitacion_ocupada_se_rechaza PASSED
+tests/test_servicios.py::test_crear_reserva_habitacion_en_mantenimiento_se_rechaza PASSED
+tests/test_servicios.py::test_crear_reserva_habitacion_inexistente PASSED
+
+============================= 26 passed in 3.85s ==============================

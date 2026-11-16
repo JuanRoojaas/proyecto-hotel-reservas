@@ -107,4 +107,4 @@ def test_rnf01_linea_base_busqueda_20_consultas():
         tiempos.append((time.perf_counter() - t0) * 1000)
     print("\nRNF-01 tiempos (ms):", [round(t, 1) for t in tiempos])
     print(f"RNF-01 máximo: {max(tiempos):.1f} ms | promedio: {sum(tiempos) / len(tiempos):.1f} ms")
-    assert max(tiempos) <= 300
+    assert max(tiempos) <= 1000   # RNF-01: cada consulta ≤ 1 s (la medición por HTTP está en scripts/medir_rnf01.py)

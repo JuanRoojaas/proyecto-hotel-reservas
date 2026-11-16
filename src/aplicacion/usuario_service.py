@@ -24,6 +24,6 @@ class UsuarioService:
             datos["correo"], password_hash,
         )
         # La respuesta nunca incluye la contraseña ni el hash (RNF-03).
-        return {"mensaje": "Usuario registrado", "id_usuario": id_usuario,
+        return {"id_usuario": id_usuario,
                 "nombre": datos["nombre"], "apellido": datos["apellido"],
                 "correo": datos["correo"], "rol": "huesped"}

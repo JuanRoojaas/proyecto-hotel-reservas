@@ -1,0 +1,171 @@
+# =====================================================================
+#  Hotel Cancun · Corte vertical "Reservar una habitación" · Semana 14
+#  Demo de la API con la extensión REST Client de VS Code.
+#
+#  Antes de empezar:
+#   1. Recrear la base: ejecutar db/01_schema.sql y db/02_seed.sql
+#      (así los resultados coinciden con los esperados de cada petición).
+#   2. Encender el servidor: python app.py
+#   3. Hacer clic en "Send Request" sobre cada petición, en orden.
+#
+#  Estado inicial: habitación 1 OCUPADA el 10 y 11 de dic. de 2026,
+#  habitación 2 LIBRE, habitación 24 en mantenimiento, usuario 1 = ana@correo.com.
+# =====================================================================
+
+@base = http://127.0.0.1:3000/api
+
+### 0. ¿Está encendida la API?  → 200
+GET {{base}}/salud
+
+
+# =====================================================================
+#  RF-01 · Registro de usuario (prioridad 3)
+# =====================================================================
+
+### RF-01 válido: registrar un huésped nuevo  → 201, rol "huesped", sin contraseña en la respuesta
+# El correo lleva la hora para que se pueda repetir sin chocar con el anterior.
+# @name registrar
+POST {{base}}/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Juan",
+  "apellido": "Rojas",
+  "fecha_nacimiento": "2003-05-10",
+  "correo": "juan{{$timestamp}}@correo.com",
+  "password": "Hotel2026!"
+}
+
+### RF-01 rechazo: correo ya registrado  → 409 CORREO_REGISTRADO
+POST {{base}}/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Ana",
+  "apellido": "Gómez",
+  "correo": "ana@correo.com",
+  "password": "Hotel2026!"
+}
+
+### RF-01 entrada inválida: contraseña de menos de 8 caracteres  → 400 PASSWORD_DEBIL
+POST {{base}}/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Pedro",
+  "apellido": "López",
+  "correo": "pedro@correo.com",
+  "password": "123"
+}
+
+
+# =====================================================================
+#  RF-02 · Búsqueda de habitaciones disponibles (prioridad 2)
+# =====================================================================
+
+### RF-02 válido: libres del 10 al 12 de dic.  → 200, 22 habitaciones (sin la 1 ni la 24)
+GET {{base}}/habitaciones/disponibles?fecha_inicio=2026-12-10&fecha_fin=2026-12-12
+
+### RF-02 filtro por tipo: solo suites  → 200, 6 habitaciones
+GET {{base}}/habitaciones/disponibles?fecha_inicio=2026-12-10&fecha_fin=2026-12-12&tipo=suite
+
+### RF-02 sin resultados: un tipo que no existe  → 200 con lista vacía []
+GET {{base}}/habitaciones/disponibles?fecha_inicio=2026-12-10&fecha_fin=2026-12-12&tipo=penthouse
+
+### RF-02 entrada inválida: fecha de fin antes que la de inicio  → 400 RANGO_INVALIDO
+GET {{base}}/habitaciones/disponibles?fecha_inicio=2026-12-12&fecha_fin=2026-12-10
+
+
+# =====================================================================
+#  RF-03 · Crear la reserva (prioridad 1)
+# =====================================================================
+
+### RF-03 válido: el huésped recién registrado reserva la habitación 2  → 201 con id_reserva real
+# Usa el id_usuario que devolvió "registrar" (ejecute esa petición primero).
+# @name crearReserva
+POST {{base}}/reservas
+Content-Type: application/json
+
+{
+  "id_usuario": {{registrar.response.body.$.id_usuario}},
+  "id_habitacion": 2,
+  "fecha_inicio": "2026-12-10",
+  "fecha_fin": "2026-12-12"
+}
+
+### RF-03 consultar la reserva creada, con su ID real  → 200, mismos datos
+GET {{base}}/reservas/{{crearReserva.response.body.$.id_reserva}}
+
+### RF-03 comprobar en RF-02: la habitación 2 ya no aparece  → 200, 21 habitaciones
+GET {{base}}/habitaciones/disponibles?fecha_inicio=2026-12-10&fecha_fin=2026-12-12
+
+### RF-03 rechazo: la habitación 1 ya está ocupada esas noches  → 409 HABITACION_OCUPADA
+POST {{base}}/reservas
+Content-Type: application/json
+
+{
+  "id_usuario": 1,
+  "id_habitacion": 1,
+  "fecha_inicio": "2026-12-10",
+  "fecha_fin": "2026-12-12"
+}
+
+### RF-03 límite: entrar a la habitación 1 el día que la otra reserva sale  → 201
+POST {{base}}/reservas
+Content-Type: application/json
+
+{
+  "id_usuario": 1,
+  "id_habitacion": 1,
+  "fecha_inicio": "2026-12-12",
+  "fecha_fin": "2026-12-14"
+}
+
+### RF-03 rechazo: la habitación 24 está en mantenimiento  → 409 HABITACION_NO_OPERATIVA
+POST {{base}}/reservas
+Content-Type: application/json
+
+{
+  "id_usuario": 1,
+  "id_habitacion": 24,
+  "fecha_inicio": "2026-12-10",
+  "fecha_fin": "2026-12-12"
+}
+
+### RF-03 entrada inválida: id_habitacion no es un entero  → 400 ID_INVALIDO
+POST {{base}}/reservas
+Content-Type: application/json
+
+{
+  "id_usuario": 1,
+  "id_habitacion": "abc",
+  "fecha_inicio": "2026-12-10",
+  "fecha_fin": "2026-12-12"
+}
+
+### RF-03 entrada inválida: falta fecha_fin  → 400 DATOS_FALTANTES
+POST {{base}}/reservas
+Content-Type: application/json
+
+{
+  "id_usuario": 1,
+  "id_habitacion": 3,
+  "fecha_inicio": "2026-12-10"
+}
+
+### RF-03 huésped inexistente  → 404 USUARIO_NO_ENCONTRADO
+POST {{base}}/reservas
+Content-Type: application/json
+
+{
+  "id_usuario": 999,
+  "id_habitacion": 3,
+  "fecha_inicio": "2026-12-10",
+  "fecha_fin": "2026-12-12"
+}
+
+### RF-03 consultar una reserva que no existe  → 404 RESERVA_NO_ENCONTRADA
+GET {{base}}/reservas/999999
+
+### RF-03 consultar con un ID que no es entero positivo  → 400 ID_INVALIDO
+GET {{base}}/reservas/abc

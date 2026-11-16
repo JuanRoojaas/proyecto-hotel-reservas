@@ -52,3 +52,15 @@ def test_registro_invalido(datos, codigo):
     with pytest.raises(r.ErrorDeNegocio) as e:
         r.validar_datos_registro(datos)
     assert e.value.codigo == codigo
+
+
+@pytest.mark.parametrize("valor,esperado", [(7, 7), ("7", 7)])
+def test_id_valido(valor, esperado):
+    assert r.validar_id(valor, "id") == esperado
+
+
+@pytest.mark.parametrize("valor", ["abc", 0, -3, 2.5, True, None, "", "-1"])
+def test_id_invalido(valor):
+    with pytest.raises(r.ErrorDeNegocio) as e:
+        r.validar_id(valor, "id")
+    assert e.value.codigo == "ID_INVALIDO"

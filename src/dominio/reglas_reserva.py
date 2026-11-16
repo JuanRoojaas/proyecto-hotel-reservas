@@ -20,6 +20,22 @@ def _faltantes(datos, campos):
     return [c for c in campos if datos.get(c) in (None, "")]
 
 
+# ---------------------------------------------------------------- Comunes
+def validar_id(valor, campo):
+    """Un identificador debe ser un entero positivo (1, 2, 3...).
+
+    Acepta el número como int o como texto de dígitos ("7", útil para la ruta
+    /api/reservas/7). Rechaza "abc", 0, -3, 2.5 y True.
+    """
+    if isinstance(valor, bool):
+        valor = None
+    if isinstance(valor, str) and valor.isdigit():
+        valor = int(valor)
+    if not isinstance(valor, int) or valor < 1:
+        raise ErrorDeNegocio("ID_INVALIDO", f"El campo {campo} debe ser un entero positivo")
+    return valor
+
+
 # ---------------------------------------------------------------- RF-01
 PATRON_CORREO = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 LONGITUD_MINIMA_PASSWORD = 8
